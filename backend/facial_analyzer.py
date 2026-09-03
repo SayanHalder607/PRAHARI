@@ -8,6 +8,7 @@ import numpy as np
 from typing import Dict, List, Optional
 
 try:
+    # pyrefly: ignore [missing-import]
     import mediapipe as mp
     MEDIAPIPE_AVAILABLE = True
 except ImportError:

@@ -15,9 +15,15 @@ venv/
 
 # Node / Frontend
 node_modules/
-frontend/node_modules/
+**/node_modules/
 frontend/dist/
 frontend/build/
+prahari-chat/frontend/dist/
+
+# Databases & local stores
+*.db
+*.sqlite3
+prahari.db
 
 # IDE
 .vscode/
