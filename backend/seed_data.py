@@ -4,10 +4,11 @@ Creates demo users and personnel profiles for hackathon demonstration
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+import numpy as np
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
-from models import User, PersonnelProfile
+from models import User, PersonnelProfile, StressPrediction
 from auth import get_password_hash
 
 
@@ -15,9 +16,46 @@ def seed_database():
     """Create demo data if database is empty."""
     db = SessionLocal()
     try:
-        # Check if data already exists
+        # Check if users already exist
         if db.query(User).count() > 0:
-            print("Database already seeded, skipping.")
+            if db.query(StressPrediction).count() < 10:
+                print("Seeding missing 7-day stress predictions for all profiles...")
+                profiles = db.query(PersonnelProfile).all()
+                now = datetime.utcnow()
+                for p in profiles:
+                    base = p.baseline_stress or 25.0
+                    for day_offset in range(6, -1, -1):
+                        day_time = now - timedelta(days=day_offset, hours=2)
+                        variation = np.sin(day_offset * 1.1) * 7.5 + np.random.uniform(-3, 3)
+                        psi_val = round(max(12.0, min(80.0, base + variation)), 1)
+                        tier = "self_awareness" if psi_val < 35 else ("peer_support" if psi_val < 65 else "command_action")
+                        trend_direction = "stable" if abs(variation) < 4 else ("increasing" if variation > 0 else "decreasing")
+
+                        pred = StressPrediction(
+                            id=str(uuid.uuid4()),
+                            personnel_id=p.id,
+                            timestamp=day_time,
+                            psi_score=psi_val,
+                            confidence=0.94,
+                            risk_tier=tier,
+                            contributing_factors={
+                                "Sleep duration": round(float(np.random.uniform(5.5, 7.5)), 1),
+                                "Workload intensity": round(float(np.random.uniform(4.0, 8.0)), 1),
+                                "HRV ratio": round(float(np.random.uniform(0.75, 1.1)), 2),
+                            },
+                            trend=trend_direction,
+                            physiological_score=round(psi_val * 0.9, 1),
+                            facial_score=round(psi_val * 0.8, 1),
+                            sleep_score=round(psi_val * 1.05, 1),
+                            workload_score=round(psi_val * 1.1, 1),
+                            psychometric_score=round(psi_val * 0.95, 1),
+                            historical_score=round(base, 1),
+                        )
+                        db.add(pred)
+                db.commit()
+                print("Seeded missing 7-day stress predictions successfully.")
+            else:
+                print("Database already fully seeded, skipping.")
             return
 
         print("Seeding database with demo data...")
@@ -111,8 +149,40 @@ def seed_database():
         for user in users:
             db.add(user)
 
+        now = datetime.utcnow()
+        for p in profiles:
+            base = p.baseline_stress or 25.0
+            for day_offset in range(6, -1, -1):
+                day_time = now - timedelta(days=day_offset, hours=2)
+                variation = np.sin(day_offset * 1.1) * 7.5 + np.random.uniform(-3, 3)
+                psi_val = round(max(12.0, min(80.0, base + variation)), 1)
+                tier = "self_awareness" if psi_val < 35 else ("peer_support" if psi_val < 65 else "command_action")
+                trend_direction = "stable" if abs(variation) < 4 else ("increasing" if variation > 0 else "decreasing")
+
+                pred = StressPrediction(
+                    id=str(uuid.uuid4()),
+                    personnel_id=p.id,
+                    timestamp=day_time,
+                    psi_score=psi_val,
+                    confidence=0.94,
+                    risk_tier=tier,
+                    contributing_factors={
+                        "Sleep duration": round(np.random.uniform(5.5, 7.5), 1),
+                        "Workload intensity": round(np.random.uniform(4.0, 8.0), 1),
+                        "HRV ratio": round(np.random.uniform(0.75, 1.1), 2),
+                    },
+                    trend=trend_direction,
+                    physiological_score=round(psi_val * 0.9, 1),
+                    facial_score=round(psi_val * 0.8, 1),
+                    sleep_score=round(psi_val * 1.05, 1),
+                    workload_score=round(psi_val * 1.1, 1),
+                    psychometric_score=round(psi_val * 0.95, 1),
+                    historical_score=round(base, 1),
+                )
+                db.add(pred)
+
         db.commit()
-        print(f"Seeded {len(profiles)} personnel profiles and {len(users)} users.")
+        print(f"Seeded {len(profiles)} personnel profiles, {len(users)} users, and 7-day historical trend predictions.")
         print("Demo credentials: username=personnel1 password=demo123")
         print("                  username=welfare1   password=demo123")
         print("                  username=commander1 password=demo123")
