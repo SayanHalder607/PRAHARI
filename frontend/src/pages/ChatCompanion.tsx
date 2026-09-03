@@ -51,41 +51,21 @@ const ChatCompanion: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize with database history or welcome greeting
+  // Initialize with welcome message tailored to user
   useEffect(() => {
-    fetchHistory();
+    const initialGreeting = `Jai Hind, ${user?.username || 'soldier'}. I am PRAHARI Guardian, your confidential welfare companion. Our conversation is 100% private, non-punitive, and will never affect your duty postings or evaluations. How are you feeling today?`;
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: initialGreeting,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
+
     fetchStatus();
     fetchSummary();
   }, [user]);
-
-  const fetchHistory = async () => {
-    try {
-      const res = await api.get('/chat/history');
-      if (res.data && res.data.length > 0) {
-        setMessages(res.data);
-      } else {
-        const initialGreeting = `Jai Hind, ${user?.username || 'soldier'}. I am PRAHARI Guardian, your confidential welfare companion. Our conversation is 100% private, non-punitive, and will never affect your duty postings or evaluations. How are you feeling today?`;
-        setMessages([
-          {
-            id: 'welcome',
-            role: 'assistant',
-            content: initialGreeting,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          },
-        ]);
-      }
-    } catch {
-      const initialGreeting = `Jai Hind, ${user?.username || 'soldier'}. I am PRAHARI Guardian, your confidential welfare companion. How are you feeling today?`;
-      setMessages([
-        {
-          id: 'welcome',
-          role: 'assistant',
-          content: initialGreeting,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    }
-  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

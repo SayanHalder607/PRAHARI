@@ -178,15 +178,3 @@ class ModelVersion(Base):
     auroc = Column(Float, nullable=False)
     training_timestamp = Column(DateTime, default=datetime.utcnow)
     config = Column(JSON, nullable=False)
-
-
-class ChatMessage(Base):
-    __tablename__ = "chat_messages"
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    personnel_id = Column(String, ForeignKey("personnel_profiles.id"), nullable=True)
-    sender = Column(String, nullable=False)  # "user" or "assistant"
-    message = Column(Text, nullable=False)
-    psi_score = Column(Float, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-
