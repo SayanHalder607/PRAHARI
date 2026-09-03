@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Shield, User, Activity, Heart, BarChart3, AlertTriangle, Settings, LogOut } from 'lucide-react';
+import { Shield, User, Activity, Heart, BarChart3, AlertTriangle, Settings, LogOut, MessageSquare } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -15,6 +15,7 @@ const Navbar: React.FC = () => {
 
   const navItems = [
     { path: '/personnel', label: 'Dashboard', icon: <User className="w-4 h-4" />, roles: ['personnel', 'welfare_officer', 'medical_officer', 'commander', 'admin'] },
+    { path: '/chat', label: 'AI Companion', icon: <MessageSquare className="w-4 h-4" />, roles: ['personnel', 'welfare_officer', 'medical_officer', 'commander', 'admin'] },
     { path: '/live-monitor', label: 'Live Monitor', icon: <Activity className="w-4 h-4" />, roles: ['personnel', 'welfare_officer', 'medical_officer', 'commander', 'admin'] },
     { path: '/wellness-checkin', label: 'Check-In', icon: <Heart className="w-4 h-4" />, roles: ['personnel', 'welfare_officer', 'admin'] },
     { path: '/welfare-officer', label: 'Welfare', icon: <Shield className="w-4 h-4" />, roles: ['welfare_officer', 'medical_officer', 'admin'] },

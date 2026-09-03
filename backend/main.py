@@ -20,6 +20,7 @@ from schemas import LoginRequest, WellnessCheckInRequest, SimulationRequest
 from psi_engine import PSIEngine
 from simulation import SensorSimulator
 from seed_data import seed_database
+from routers import chat
 
 # Create tables & seed
 Base.metadata.create_all(bind=engine)
@@ -46,6 +47,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(chat.router)
 
 simulation_state: Dict[str, Any] = {
     "active_personnel": {},

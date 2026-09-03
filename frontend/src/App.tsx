@@ -11,6 +11,7 @@ import Alerts from './pages/Alerts';
 import Interventions from './pages/Interventions';
 import ModelAnalytics from './pages/ModelAnalytics';
 import AdminDashboard from './pages/AdminDashboard';
+import ChatCompanion from './pages/ChatCompanion';
 import Navbar from './components/Navbar';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -28,6 +29,7 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to={isAuthenticated ? '/personnel' : '/login'} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/personnel" element={<ProtectedRoute><PersonnelDashboard /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><ChatCompanion /></ProtectedRoute>} />
         <Route path="/facial-scan" element={<ProtectedRoute><FacialScanPage /></ProtectedRoute>} />
         <Route path="/wellness-checkin" element={<ProtectedRoute><WellnessCheckInPage /></ProtectedRoute>} />
         <Route path="/live-monitor" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
