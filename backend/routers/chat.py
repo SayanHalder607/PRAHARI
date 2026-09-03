@@ -1,7 +1,7 @@
 """
 PRAHARI AI Companion Router
 Provides confidential, welfare-first AI conversational support powered by Ollama (qwen3:8b),
-grounded in real-time personnel stress telemetry and physiological baselines.
+grounded in real-time personnel stress telemetry, physiological baselines, and database persistence.
 """
 
 import os
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 import httpx
 
 from database import get_db
-from models import User, StressPrediction, PersonnelProfile
+from models import User, StressPrediction, PersonnelProfile, ChatMessage
 from auth import get_current_user
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -62,6 +62,30 @@ async def get_chat_status():
             "url": ollama_url
         }
 
+@router.get("/history")
+async def get_chat_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Retrieve full persistent chat history for the authenticated user from the database."""
+    messages = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.user_id == current_user.id)
+        .order_by(ChatMessage.timestamp.asc())
+        .limit(100)
+        .all()
+    )
+    return [
+        {
+            "id": m.id,
+            "role": m.sender,
+            "content": m.message,
+            "psi_score": m.psi_score,
+            "timestamp": m.timestamp.strftime("%I:%M %p") if m.timestamp else ""
+        }
+        for m in messages
+    ]
+
 @router.get("/summary")
 async def get_wellness_summary(
     current_user: User = Depends(get_current_user),
@@ -98,7 +122,7 @@ async def send_chat_message(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Process message and return empathetic, stress-calibrated response via Ollama."""
+    """Process message, persist conversation to database, and return stress-calibrated Ollama response."""
     if not body.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
@@ -122,6 +146,17 @@ async def send_chat_message(
     risk_tier = prediction.risk_tier if prediction else "self_awareness"
     trend = prediction.trend if prediction else "stable"
     rank_and_name = f"{profile.rank} {profile.personnel_number}" if profile else current_user.username
+
+    # 1. Persist user message to the database
+    user_record = ChatMessage(
+        user_id=current_user.id,
+        personnel_id=current_user.personnel_id,
+        sender="user",
+        message=body.message,
+        psi_score=psi_score
+    )
+    db.add(user_record)
+    db.commit()
 
     # Build prompt messages
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -176,6 +211,17 @@ async def send_chat_message(
                 "Remember to hydrate and take micro-breaks whenever your post allows. What is on your mind today?"
             )
 
+    # 2. Persist assistant reply to the database
+    assistant_record = ChatMessage(
+        user_id=current_user.id,
+        personnel_id=current_user.personnel_id,
+        sender="assistant",
+        message=reply_text,
+        psi_score=psi_score
+    )
+    db.add(assistant_record)
+    db.commit()
+
     return {
         "reply": reply_text,
         "psi_context": {
@@ -184,5 +230,5 @@ async def send_chat_message(
             "trend": trend,
             "personnel_id": current_user.personnel_id
         },
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().strftime("%I:%M %p")
     }

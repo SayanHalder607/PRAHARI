@@ -73,29 +73,27 @@ The **Personnel Stress Index (PSI)** scales from **0 (Optimal Wellness)** to **1
 
 ---
 
-## 🌐 Microservices & Ports
+## 🌐 Unified Architecture & Ports
 
-PRAHARI runs as a coordinated suite of microservices:
+PRAHARI runs as a unified, production-ready stack:
 
 | Service | Port / URL | Description | Tech Stack |
 | :--- | :--- | :--- | :--- |
-| **Main Dashboard Frontend** | `http://localhost:3000` | Real-time monitoring UI, self-checkin, unit analytics | React 18, Vite, TailwindCSS |
-| **Main Backend API** | `http://localhost:8000` | Core REST & WebSocket server, PSI calculations | FastAPI, Python 3.10+, SQLAlchemy |
-| **TimescaleDB / PostgreSQL** | `localhost:5432` | High-throughput time-series physiological database | TimescaleDB (PG 15) |
-| **PRAHARI Chat Frontend** | `http://localhost:3001` | Dedicated confidential AI welfare companion UI | React 18, Vite, Responsive CSS |
-| **PRAHARI Chat Backend** | `http://localhost:8001` | Conversational PSI analysis & Ollama orchestration | FastAPI, Uvicorn, HTTPX, Pydantic |
+| **Main Dashboard Frontend** | `http://localhost:3000` | Real-time monitoring UI, self-checkin, unit analytics & **Integrated AI Companion** (`/chat`) | React 18, Vite, TailwindCSS |
+| **Main Backend API** | `http://localhost:8000` | Core REST & WebSocket server, PSI engine & `/api/chat` Ollama router | FastAPI, Python 3.10+, SQLAlchemy |
+| **TimescaleDB / PostgreSQL** | `localhost:5432` | High-throughput time-series physiological database & persistent chat history | TimescaleDB (PG 15) |
 | **Local LLM Engine** | `localhost:11434` | Private on-device Large Language Model inference | Ollama (`qwen3:8b`) |
 
 ---
 
-## 🤖 PRAHARI AI Welfare Companion (`prahari-chat`)
+## 🤖 Integrated PRAHARI AI Companion (`/chat`)
 
-`prahari-chat` provides a 100% private, on-premise AI companion for personnel:
+The AI Companion is built natively into the main dashboard and backend:
 
-- **Local Inference via Ollama (`qwen3:8b`):** No conversational data ever leaves the local environment or defense network.
-- **Conversational PSI Cues:** Analyzes text for acute strain, exhaustion, and cognitive overload keywords in real time.
+- **Database-Backed Persistence:** Conversations are saved to the `chat_messages` table in PostgreSQL/TimescaleDB, linked to the authenticated soldier's personnel profile.
+- **Local Inference via Ollama (`qwen3:8b`):** Completely private and on-premise; no confidential disclosures ever leave the defense network.
+- **Real-Time Telemetry Context:** Injects the soldier's live PSI score, trend, and duty status into the prompt context for stress-calibrated psychological first-aid.
 - **Tactical Box Breathing (4-4-4-4):** Interactive visual de-arousal tool simulating defense standard breathing resets (Inhale 4s, Hold 4s, Exhale 4s, Hold 4s).
-- **Explainable Factors:** Displays live PSI breakdown, operational shift hours, and sleep recovery ratings.
 
 ---
 
@@ -103,33 +101,23 @@ PRAHARI runs as a coordinated suite of microservices:
 
 ### Prerequisites
 - [Docker & Docker Compose](https://docs.docker.com/get-docker/) installed and running.
-- (Optional for chat) [Ollama](https://ollama.ai/) installed on host with `qwen3:8b`:
+- [Ollama](https://ollama.ai/) installed on host with `qwen3:8b`:
   ```bash
   ollama pull qwen3:8b
   ollama serve
   ```
 
-### 1. Clone Repository
+### Launch PRAHARI System
 ```bash
 git clone https://github.com/SayanHalder607/PRAHARI.git
 cd PRAHARI
-```
 
-### 2. Launch Main PRAHARI System
-```bash
-# Starts TimescaleDB, FastAPI Backend, and React Frontend
+# Starts TimescaleDB, Backend, and Frontend (all services unified)
 docker compose up -d --build
 ```
-- Frontend: **[http://localhost:3000](http://localhost:3000)**
-- API Docs: **[http://localhost:8000/docs](http://localhost:8000/docs)**
+- Dashboard & AI Companion: **[http://localhost:3000](http://localhost:3000)**
+- Interactive API Docs: **[http://localhost:8000/docs](http://localhost:8000/docs)**
 
-### 3. Launch PRAHARI Chat Companion
-```bash
-cd prahari-chat
-docker compose up -d --build
-```
-- Chat Interface: **[http://localhost:3001](http://localhost:3001)**
-- Chat API Docs: **[http://localhost:8001/docs](http://localhost:8001/docs)**
 
 ---
 
@@ -164,26 +152,18 @@ PRAHARI/
 │   ├── database.py           # TimescaleDB / SQLite connection engine
 │   ├── facial_analyzer.py    # MediaPipe facial behavioral stress cue extraction
 │   ├── main.py               # API endpoints & WebSocket simulation stream
-│   ├── models.py             # SQLAlchemy ORM schemas
+│   ├── models.py             # SQLAlchemy ORM schemas (including ChatMessage)
 │   ├── psi_engine.py         # Multi-modal PSI calculation engine
-│   └── routers/              # Modular API routers (personnel, alerts, welfare, etc.)
+│   └── routers/              # Modular routers (chat.py, personnel, alerts, etc.)
 ├── frontend/                 # Main React Dashboard
 │   ├── src/
 │   │   ├── components/       # Reusable components (Navbar, TrendChart, FacialScan, etc.)
-│   │   ├── pages/            # Role-specific dashboards & live telemetry
-│   │   └── api.ts            # Centralized API client
-│   └── vite.config.ts        # Vite configuration with proxy
-├── prahari-chat/             # Dedicated AI Welfare Chat Companion
-│   ├── backend/              # FastAPI chat service with Ollama integration
-│   │   ├── llm.py            # Local Ollama client (qwen3:8b)
-│   │   ├── psi_engine.py     # Conversational PSI scoring
-│   │   └── main.py           # Chat API endpoints
-│   ├── frontend/             # Dedicated React chat companion UI
-│   │   └── src/App.jsx       # Tactical chat interface & box breathing modal
-│   └── docker-compose.yml    # Independent microservice compose file
+│   │   ├── pages/            # Role dashboards, Live Monitor, ChatCompanion.tsx
+│   │   └── api.ts            # Centralized API client with JWT interceptor
+│   └── vite.config.ts        # Vite configuration with proxy to backend
 ├── data/                     # Mock generators & test datasets
 ├── tests/                    # Unit & integration test suite (PSI, security, auth)
-└── docker-compose.yml        # Orchestration for core PRAHARI stack
+└── docker-compose.yml        # Unified orchestration (db, backend, frontend)
 ```
 
 ---
