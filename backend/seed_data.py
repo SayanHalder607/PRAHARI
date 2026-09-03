@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
-from models import User, PersonnelProfile, StressPrediction
+from models import User, PersonnelProfile, StressPrediction, WearableReading, SleepRecord, DutyRecord
 from auth import get_password_hash
 
 
@@ -18,10 +18,12 @@ def seed_database():
     try:
         # Check if users already exist
         if db.query(User).count() > 0:
+            profiles = db.query(PersonnelProfile).all()
+            now = datetime.utcnow()
+
+            # Seed 7-day historical StressPredictions if missing
             if db.query(StressPrediction).count() < 10:
                 print("Seeding missing 7-day stress predictions for all profiles...")
-                profiles = db.query(PersonnelProfile).all()
-                now = datetime.utcnow()
                 for p in profiles:
                     base = p.baseline_stress or 25.0
                     for day_offset in range(6, -1, -1):
@@ -53,9 +55,74 @@ def seed_database():
                         )
                         db.add(pred)
                 db.commit()
-                print("Seeded missing 7-day stress predictions successfully.")
-            else:
-                print("Database already fully seeded, skipping.")
+
+            # Seed WearableReading if missing
+            if db.query(WearableReading).count() == 0:
+                print("Seeding missing wearable readings...")
+                for p in profiles:
+                    for i in range(15):
+                        t = now - timedelta(minutes=(15 - i) * 5)
+                        reading = WearableReading(
+                            id=str(uuid.uuid4()),
+                            personnel_id=p.id,
+                            timestamp=t,
+                            heart_rate=round(float(np.random.normal(p.baseline_hr or 72.0, 3)), 1),
+                            hrv=round(float(np.random.normal(p.baseline_hrv or 55.0, 4)), 1),
+                            spo2=round(float(np.random.normal(97.8, 0.4)), 1),
+                            eda=round(float(np.random.normal(2.4, 0.4)), 2),
+                            skin_temperature=round(float(np.random.normal(36.6, 0.2)), 1),
+                            accelerometer_x=round(float(np.random.normal(0, 0.05)), 3),
+                            accelerometer_y=round(float(np.random.normal(0, 0.05)), 3),
+                            accelerometer_z=round(float(np.random.normal(1, 0.05)), 3),
+                            activity_level=round(float(np.random.uniform(0.1, 0.3)), 2),
+                            step_count=int(np.random.randint(5, 30)),
+                        )
+                        db.add(reading)
+                db.commit()
+
+            # Seed SleepRecord if missing
+            if db.query(SleepRecord).count() == 0:
+                print("Seeding missing sleep records...")
+                for p in profiles:
+                    for d in range(7):
+                        st = now - timedelta(days=d)
+                        dur = round(float(np.random.uniform(6.2, 8.1)), 1)
+                        eff = round(float(np.random.uniform(78.0, 93.0)), 1)
+                        slp = SleepRecord(
+                            id=str(uuid.uuid4()),
+                            personnel_id=p.id,
+                            date=st,
+                            sleep_duration=dur,
+                            sleep_efficiency=eff,
+                            interruptions=int(np.random.randint(1, 4)),
+                            deep_sleep_percentage=round(float(np.random.uniform(18.0, 25.0)), 1),
+                            rem_sleep_percentage=round(float(np.random.uniform(20.0, 26.0)), 1),
+                            sleep_debt=max(0.0, round(float(p.baseline_sleep_hours - dur), 1)),
+                        )
+                        db.add(slp)
+                db.commit()
+
+            # Seed DutyRecord if missing
+            if db.query(DutyRecord).count() == 0:
+                print("Seeding missing duty records...")
+                for p in profiles:
+                    for d in range(7):
+                        dt = now - timedelta(days=d)
+                        duty = DutyRecord(
+                            id=str(uuid.uuid4()),
+                            personnel_id=p.id,
+                            date=dt,
+                            duty_hours=round(float(np.random.uniform(8.0, 11.5)), 1),
+                            consecutive_days=d + 1,
+                            night_shift=(d % 3 == 0),
+                            operational_intensity=round(float(np.random.uniform(3.0, 6.5)), 1),
+                            break_duration=round(float(np.random.uniform(1.0, 2.5)), 1),
+                            time_since_rest=round(float(np.random.uniform(2.0, 5.0)), 1),
+                        )
+                        db.add(duty)
+                db.commit()
+
+            print("Database fully seeded with all example datasets (wearables, sleep, duty, predictions).")
             return
 
         print("Seeding database with demo data...")

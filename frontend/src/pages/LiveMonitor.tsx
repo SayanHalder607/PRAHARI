@@ -17,9 +17,23 @@ import {
 } from 'lucide-react';
 
 const LiveMonitor: React.FC = () => {
-  const { user } = useAuth();
-  const [reading, setReading] = useState<Record<string, number> | null>(null);
-  const [readingHistory, setReadingHistory] = useState<number[]>([]);
+  const defaultSampleReading: Record<string, number> = {
+    heart_rate: 74.0,
+    hrv: 54.5,
+    spo2: 98.2,
+    eda: 2.45,
+    skin_temperature: 36.6,
+    respiratory_rate: 15.8,
+    autonomic_balance: 1.25,
+    activity_level: 0.22,
+    step_count: 14,
+    psi_score: 24.5,
+  };
+
+  const [reading, setReading] = useState<Record<string, number>>(defaultSampleReading);
+  const [readingHistory, setReadingHistory] = useState<number[]>([
+    70, 72, 71, 74, 73, 75, 72, 70, 71, 73, 74, 72, 75, 74, 73, 72, 71, 74, 73, 74
+  ]);
   const [psi, setPsi] = useState<number>(24.5);
   const [scenario, setScenario] = useState<string>('normal');
   const [simActive, setSimActive] = useState<boolean>(true);

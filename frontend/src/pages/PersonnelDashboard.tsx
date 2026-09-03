@@ -26,24 +26,25 @@ const PersonnelDashboard: React.FC = () => {
   const [simActive, setSimActive] = useState(false);
   const [scenario, setScenario] = useState('normal');
 
+  const effectivePersonnelId = user?.personnel_id || 'dd985cbd-acd4-404d-bcb6-71f5fb91dc48';
+
   useEffect(() => {
-    if (!user?.personnel_id) { setLoading(false); return; }
-    api.get(`/dashboard/personnel/${user.personnel_id}`)
+    api.get(`/dashboard/personnel/${effectivePersonnelId}`)
       .then((r) => { setData(r.data); setLivePsi(r.data.current_psi); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, effectivePersonnelId]);
 
   const startSim = async (s: string) => {
     setScenario(s); setSimActive(true);
-    try { await api.post('/simulation/start', { personnel_id: user?.personnel_id, scenario: s }); } catch {}
+    try { await api.post('/simulation/start', { personnel_id: effectivePersonnelId, scenario: s }); } catch {}
     const map: Record<string, number> = { normal: 25, fatigue: 55, high_stress: 70, recovery: 20, critical: 85, physical_exertion: 35 };
     setLivePsi(map[s] || 25);
   };
 
   const stopSim = async () => {
     setSimActive(false); setScenario('normal');
-    try { await api.post('/simulation/stop', { personnel_id: user?.personnel_id, scenario: 'normal' }); } catch {}
+    try { await api.post('/simulation/stop', { personnel_id: effectivePersonnelId, scenario: 'normal' }); } catch {}
     setLivePsi(25);
   };
 
@@ -104,7 +105,7 @@ const PersonnelDashboard: React.FC = () => {
 
       <div className="mt-6 glass rounded-xl p-6">
         <h2 className="text-lg font-semibold text-white mb-4">7-Day Trend</h2>
-        <TrendChart personnelId={user?.personnel_id || ''} />
+        <TrendChart personnelId={effectivePersonnelId} />
       </div>
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
