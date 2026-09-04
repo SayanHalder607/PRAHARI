@@ -55,3 +55,11 @@ class PersonnelProfileResponse(BaseModel):
     baseline_hr: float
     baseline_hrv: float
     baseline_sleep_hours: float
+
+
+class FacialScanRequest(BaseModel):
+    personnel_id: Optional[str] = None
+    frames: Optional[List[str]] = None
+    image: Optional[str] = None
+    metrics: Optional[Dict[str, Any]] = None
+

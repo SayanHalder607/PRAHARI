@@ -46,3 +46,18 @@ body {
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* Tactical Laser Scanner */
+@keyframes laser-scan {
+  0% { top: 6%; opacity: 0.4; }
+  50% { top: 90%; opacity: 0.95; }
+  100% { top: 6%; opacity: 0.4; }
+}
+.animate-laser-scan {
+  animation: laser-scan 2.2s ease-in-out infinite;
+}
+
+.mirror {
+  transform: scaleX(-1);
+}
+

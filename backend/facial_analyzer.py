@@ -3,17 +3,22 @@ PRAHARI Facial Stress & Affect Analysis Module
 Uses MediaPipe (or OpenCV fallback) for facial landmark detection and temporal feature extraction
 """
 
-import cv2
-import numpy as np
-from typing import Dict, List, Optional
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except Exception:
+    cv2 = None
+    CV2_AVAILABLE = False
 
 try:
-    # pyrefly: ignore [missing-import]
     import mediapipe as mp
     MEDIAPIPE_AVAILABLE = True
-except ImportError:
+except Exception:
     mp = None
     MEDIAPIPE_AVAILABLE = False
+
+import numpy as np
+from typing import Dict, List, Optional, Any
 
 
 class FacialStressAnalyzer:
