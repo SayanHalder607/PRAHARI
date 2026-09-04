@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 
 const LiveMonitor: React.FC = () => {
+  const { user } = useAuth();
   const defaultSampleReading: Record<string, number> = {
     heart_rate: 74.0,
     hrv: 54.5,

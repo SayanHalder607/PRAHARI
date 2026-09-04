@@ -390,12 +390,11 @@ async def websocket_endpoint(websocket: WebSocket, personnel_id: str):
     simulation_state["websocket_clients"].add(websocket)
     try:
         while True:
-            if personnel_id in simulation_state["active_personnel"]:
-                scenario = simulation_state["active_personnel"][personnel_id]["scenario"]
-                reading = sensor_simulator.generate_reading(scenario)
-                reading["psi_score"] = _calculate_quick_psi(scenario)
-                await websocket.send_json({"type": "sensor_reading", "data": reading})
-            await asyncio.sleep(5)
+            scenario = simulation_state.get("active_personnel", {}).get(personnel_id, {}).get("scenario", "normal")
+            reading = sensor_simulator.generate_reading(scenario)
+            reading["psi_score"] = _calculate_quick_psi(scenario)
+            await websocket.send_json({"type": "sensor_reading", "data": reading})
+            await asyncio.sleep(2)
     except WebSocketDisconnect:
         simulation_state["websocket_clients"].discard(websocket)
 

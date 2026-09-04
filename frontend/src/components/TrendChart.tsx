@@ -23,16 +23,17 @@ interface TrendPoint {
   short_day?: string;
 }
 
-  const defaultSampleData: TrendPoint[] = [
-    { timestamp: '2026-08-28T00:00:00', psi_score: 24.5, trend: 'stable', day_label: 'Fri 28 Aug', short_day: 'Fri' },
-    { timestamp: '2026-08-29T00:00:00', psi_score: 21.2, trend: 'stable', day_label: 'Sat 29 Aug', short_day: 'Sat' },
-    { timestamp: '2026-08-30T00:00:00', psi_score: 17.8, trend: 'decreasing', day_label: 'Sun 30 Aug', short_day: 'Sun' },
-    { timestamp: '2026-08-31T00:00:00', psi_score: 24.0, trend: 'stable', day_label: 'Mon 31 Aug', short_day: 'Mon' },
-    { timestamp: '2026-09-01T00:00:00', psi_score: 30.5, trend: 'increasing', day_label: 'Tue 01 Sep', short_day: 'Tue' },
-    { timestamp: '2026-09-02T00:00:00', psi_score: 28.4, trend: 'stable', day_label: 'Wed 02 Sep', short_day: 'Wed' },
-    { timestamp: '2026-09-03T00:00:00', psi_score: 23.6, trend: 'stable', day_label: 'Today', short_day: 'Today' },
-  ];
+const defaultSampleData: TrendPoint[] = [
+  { timestamp: '2026-08-28T00:00:00', psi_score: 24.5, trend: 'stable', day_label: 'Fri 28 Aug', short_day: 'Fri' },
+  { timestamp: '2026-08-29T00:00:00', psi_score: 21.2, trend: 'stable', day_label: 'Sat 29 Aug', short_day: 'Sat' },
+  { timestamp: '2026-08-30T00:00:00', psi_score: 17.8, trend: 'decreasing', day_label: 'Sun 30 Aug', short_day: 'Sun' },
+  { timestamp: '2026-08-31T00:00:00', psi_score: 24.0, trend: 'stable', day_label: 'Mon 31 Aug', short_day: 'Mon' },
+  { timestamp: '2026-09-01T00:00:00', psi_score: 30.5, trend: 'increasing', day_label: 'Tue 01 Sep', short_day: 'Tue' },
+  { timestamp: '2026-09-02T00:00:00', psi_score: 28.4, trend: 'stable', day_label: 'Wed 02 Sep', short_day: 'Wed' },
+  { timestamp: '2026-09-03T00:00:00', psi_score: 23.6, trend: 'stable', day_label: 'Today', short_day: 'Today' },
+];
 
+export const TrendChart: React.FC<TrendChartProps> = ({ personnelId }) => {
   const [days, setDays] = useState<number>(7);
   const [data, setData] = useState<TrendPoint[]>(defaultSampleData);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
